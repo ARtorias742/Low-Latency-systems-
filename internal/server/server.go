@@ -56,8 +56,8 @@ func (s *Server) handleConnection(conn net.Conn) {
 		return
 	}
 
-	// Create and register UserActor
-	user := actors.NewUserActor(username, s.room, s.persistence)
+	// Create and register UserActor with connection
+	user := actors.NewUserActor(username, s.room, s.persistence, conn)
 	s.room.AddUser(user)
 	go user.Run()
 

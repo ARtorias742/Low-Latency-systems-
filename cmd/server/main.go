@@ -32,26 +32,23 @@ import (
 // 		}
 // 	}()
 
-// 	// Read user input and send to server
-// 	scanner := bufio.NewScanner(os.Stdin)
-// 	for scanner.Scan() {
-// 		msg := scanner.Text()
-// 		if msg == "exit" {
-// 			break
-// 		}
-// 		fmt.Fprintf(conn, "%s\n", msg)
-// 	}
-// }
-
+//		// Read user input and send to server
+//		scanner := bufio.NewScanner(os.Stdin)
+//		for scanner.Scan() {
+//			msg := scanner.Text()
+//			if msg == "exit" {
+//				break
+//			}
+//			fmt.Fprintf(conn, "%s\n", msg)
+//		}
+//	}
 func main() {
-	// Initialize actors
 	room := actors.NewRoomActor()
 	go room.Run()
 
 	persistence := actors.NewPersistenceActor()
 	go persistence.Run()
 
-	// Start server
 	srv := server.NewServer(room, persistence, ":8080")
 	fmt.Println("Server starting on :8080...")
 	if err := srv.Start(); err != nil {

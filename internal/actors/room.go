@@ -17,14 +17,12 @@ func NewRoomActor() *RoomActor {
 		mailbox: make(chan models.Message, 100),
 	}
 }
-
 func (r *RoomActor) Run() {
 	for msg := range r.mailbox {
-		broadcastMsg := fmt.Sprintf("%s: %s", msg.Sender, msg.Content)
-		fmt.Println("Broadcasting:", broadcastMsg)
+		fmt.Printf("Broadcasting: %s - %s\n", msg.Sender, msg.Content)
 		for id, user := range r.users {
 			if id != msg.Sender {
-				user.Send(models.Message{Sender: msg.Sender, Content: broadcastMsg})
+				user.Send(msg) // Send original message
 			}
 		}
 	}
