@@ -1,70 +1,65 @@
 # Makefile for low-latency-chat project
 
-# Variables
-BINARY_NAME = low-latency-chat
-CMD_DIR = cmd
-MAIN_FILE = $(CMD_DIR)/main.go
+BINARY_SERVER = low-latency-chat-server
+BINARY_CLIENT = low-latency-chat-client
+CMD_SERVER = cmd/server/main.go
+CMD_CLIENT = cmd/client/main.go
 
-# Default target
 .PHONY: all
 all: build
 
-# Initialize Go module (run once)
-.PHONY: init
-init:
-	go mod init low-latency-chat
-
-# Tidy dependencies
-.PHONY: tidy
-tidy:
-	go mod tidy
-
-# Build the project
 .PHONY: build
-build:
-	go build -o $(BINARY_NAME) $(MAIN_FILE)
+build: build-server build-client
 
-# Run the project
-.PHONY: run
-run:
-	go run $(MAIN_FILE)
+.PHONY: build-server
+build-server:
+	@echo "Building server..."
+	go build -o $(BINARY_SERVER) $(CMD_SERVER)
 
-# Build and run
-.PHONY: build-run
-build-run: build
-	./$(BINARY_NAME)
+.PHONY: build-client
+build-client:
+	@echo "Building client..."
+	go build -o $(BINARY_CLIENT) $(CMD_CLIENT)
 
-# Clean up generated files
+.PHONY: run-server
+run-server:
+	@echo "Starting server on :8080..."
+	go run $(CMD_SERVER)
+
+.PHONY: run-client
+run-client:
+	@if [ -z "$(USER)" ]; then \
+		echo "Error: USER variable is required. Usage: make run-client USER=<username>"; \
+		exit 1; \
+	else \
+		echo "Starting client as $(USER)..."; \
+		go run $(CMD_CLIENT) $(USER); \
+	fi
+
 .PHONY: clean
 clean:
-	rm -f $(BINARY_NAME)
+	@echo "Cleaning up..."
+	rm -f $(BINARY_SERVER) $(BINARY_CLIENT)
 
-# Format code
 .PHONY: fmt
 fmt:
+	@echo "Formatting code..."
 	go fmt ./...
 
-# Vet the code for potential issues
 .PHONY: vet
 vet:
+	@echo "Vetting code..."
 	go vet ./...
 
-# Test (if tests are added later)
-.PHONY: test
-test:
-	go test ./...
-
-# Help command to list available targets
 .PHONY: help
 help:
 	@echo "Available commands:"
-	@echo "  make init      - Initialize Go module (run once)"
-	@echo "  make tidy      - Tidy Go module dependencies"
-	@echo "  make build     - Build the project"
-	@echo "  make run       - Run the project without building"
-	@echo "  make build-run - Build and run the project"
-	@echo "  make clean     - Remove built binary"
-	@echo "  make fmt       - Format the code"
-	@echo "  make vet       - Vet the code for issues"
-	@echo "  make test      - Run tests (if any)"
-	@echo "  make help      - Show this help message"
+	@echo "  make build         - Build server and client"
+	@echo "  make build-server  - Build server only"
+	@echo "  make build-client  - Build client only"
+	@echo "  make run-server    - Run the server"
+	@echo "  make run-client USER=<username> - Run a client (e.g., make run-client USER=user1)"
+	@echo "  make clean         - Remove built binaries"
+	@echo "  make fmt           - Format the code"
+	@echo "  make vet           - Vet the code for issues"
+	@echo "  make help          - Show this help message"

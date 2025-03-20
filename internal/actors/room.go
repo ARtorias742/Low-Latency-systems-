@@ -1,6 +1,10 @@
 package actors
 
-import "github.com/ARtorias742/low_latency_chat/internal/models"
+import (
+	"fmt"
+
+	"github.com/ARtorias742/low_latency_chat/internal/models"
+)
 
 type RoomActor struct {
 	users   map[string]*UserActor
@@ -16,7 +20,7 @@ func NewRoomActor() *RoomActor {
 
 func (r *RoomActor) Run() {
 	for msg := range r.mailbox {
-		// Broadcast to all users except the sender
+		fmt.Printf("Broadcasting: %s - %s\n", msg.Sender, msg.Content)
 		for id, user := range r.users {
 			if id != msg.Sender {
 				user.Send(msg)
