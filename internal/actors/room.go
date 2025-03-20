@@ -20,10 +20,11 @@ func NewRoomActor() *RoomActor {
 
 func (r *RoomActor) Run() {
 	for msg := range r.mailbox {
-		fmt.Printf("Broadcasting: %s - %s\n", msg.Sender, msg.Content)
+		broadcastMsg := fmt.Sprintf("%s: %s", msg.Sender, msg.Content)
+		fmt.Println("Broadcasting:", broadcastMsg)
 		for id, user := range r.users {
 			if id != msg.Sender {
-				user.Send(msg)
+				user.Send(models.Message{Sender: msg.Sender, Content: broadcastMsg})
 			}
 		}
 	}

@@ -18,7 +18,6 @@ func NewPersistenceActor() *PersistenceActor {
 
 func (p *PersistenceActor) Run() {
 	for msg := range p.mailbox {
-		// Simulate async DB write
 		fmt.Printf("Logged: %s - %s\n", msg.Sender, msg.Content)
 	}
 }

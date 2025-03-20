@@ -23,18 +23,18 @@ func NewServer(room *actors.RoomActor, persistence *actors.PersistenceActor, add
 	}
 }
 
-func (s *Server) Start() {
+func (s *Server) Start() error {
 	listener, err := net.Listen("tcp", s.addr)
 	if err != nil {
-		fmt.Println("Error starting server:", err)
-		return
+		return fmt.Errorf("failed to start server: %v", err)
 	}
 	defer listener.Close()
 
+	fmt.Println("Server listening for connections...")
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			fmt.Println("Error accepting connection:", err)
+			fmt.Printf("Error accepting connection: %v\n", err)
 			continue
 		}
 		go s.handleConnection(conn)
@@ -42,25 +42,33 @@ func (s *Server) Start() {
 }
 
 func (s *Server) handleConnection(conn net.Conn) {
-
 	defer conn.Close()
 
 	// Read username from client
 	scanner := bufio.NewScanner(conn)
 	if !scanner.Scan() {
+		fmt.Println("Client disconnected before sending username")
+		return
+	}
+	username := scanner.Text()
+	if username == "" {
+		fmt.Println("Received empty username; closing connection")
 		return
 	}
 
-	username := scanner.Text()
-
-	// create and start UserActor
+	// Create and register UserActor
 	user := actors.NewUserActor(username, s.room, s.persistence)
 	s.room.AddUser(user)
 	go user.Run()
 
-	// Send message from client to UserActor
+	fmt.Printf("%s connected\n", username)
+
+	// Handle incoming messages
 	for scanner.Scan() {
 		content := scanner.Text()
-		user.Send(models.Message{Sender: username, Content: content})
+		if content != "" {
+			user.Send(models.Message{Sender: username, Content: content})
+		}
 	}
+	fmt.Printf("%s disconnected\n", username)
 }
